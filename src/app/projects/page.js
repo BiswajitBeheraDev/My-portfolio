@@ -1,20 +1,16 @@
-import React from "react";
+"use client";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
-async function getProjects() {
-  // ✅ API ko relative path se call karo
-  const res = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL ? "https://" + process.env.NEXT_PUBLIC_VERCEL_URL : "http://localhost:3000"}/api/project`, {
-    cache: "no-store",
-  });
+export default function Projects() {
+  const [projects, setProjects] = useState([]);
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch projects");
-  }
-  return res.json();
-}
-
-export default async function Projects() {
-  const projects = await getProjects();
+  useEffect(() => {
+    fetch("/api/project")
+      .then((res) => res.json())
+      .then((data) => setProjects(data))
+      .catch((err) => console.error(err));
+  }, []);
 
   return (
     <div className="flex justify-center bg-gray-900 text-white py-12">
@@ -23,10 +19,7 @@ export default async function Projects() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {projects.map((project) => (
-            <div
-              key={project.id}
-              className="bg-gray-800 p-6 rounded-lg shadow transform transition-transform duration-300 hover:scale-105 flex flex-col"
-            >
+            <div key={project.id} className="bg-gray-800 p-6 rounded-lg shadow">
               <div className="flex justify-center">
                 <Image
                   src={project.image}
@@ -36,12 +29,10 @@ export default async function Projects() {
                   className="rounded-md"
                 />
               </div>
-
               <h3 className="text-xl font-semibold text-white mt-4">
                 {project.title}
               </h3>
               <p className="text-gray-300 mt-2">{project.description}</p>
-
               {project.link && (
                 <a
                   href={project.link}
